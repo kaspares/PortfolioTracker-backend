@@ -16,6 +16,12 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<ErrorHandlingMiddleware>();
 builder.Services.AddApplication();
+builder.Services.AddCors(options =>
+      options.AddPolicy("dev", policy =>
+          policy.WithOrigins("http://localhost:5173")
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials()));
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
@@ -31,6 +37,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseCors("dev");
 app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthentication();

@@ -36,8 +36,8 @@ public static class DependencyInjection
         {
             options.Cookie.Name = ".PortfolioTracker.Auth";
             options.Cookie.HttpOnly = true;
-            options.Cookie.SameSite = SameSiteMode.Lax;
-            options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+            options.Cookie.SameSite = SameSiteMode.None;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 
             options.Events.OnRedirectToLogin = context =>
             {

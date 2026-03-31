@@ -33,6 +33,13 @@ namespace PortfolioTracker.Controllers
             return Ok(result);
         }
 
+        [HttpGet("{portfolioId}/value-history")]
+        public async Task<ActionResult<List<PortfolioValuePointDto>>> GetValueHistory(Guid portfolioId)
+        {
+            var result = await portfolioService.GetValueHistoryAsync(portfolioId);
+            return Ok(result);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Create(CreatePortfolioDto portfolio)
         {

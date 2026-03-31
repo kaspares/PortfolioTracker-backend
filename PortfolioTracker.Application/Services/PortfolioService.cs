@@ -43,8 +43,8 @@ public class PortfolioService(ILogger<PortfolioService> logger,
             item.ProfitLossPercent = cost != 0 ? Math.Round(item.ProfitLoss.Value / cost * 100, 2) : 0;
         }
 
-        dto.TotalValue = dto.Items.Sum(i => i.MarketValue ?? 0);
-        dto.TotalCost = dto.Items.Sum(i => i.Quantity * i.PurchasePrice);
+        dto.TotalValue = Math.Round(dto.Items.Sum(i => i.MarketValue ?? 0));
+        dto.TotalCost = Math.Round(dto.Items.Sum(i => i.Quantity * i.PurchasePrice));
         dto.TotalProfitLoss = dto.TotalValue - dto.TotalCost;
         dto.TotalProfitLossPercent = dto.TotalCost != 0
             ? Math.Round(dto.TotalProfitLoss.Value / dto.TotalCost.Value * 100, 2) : 0;
@@ -113,5 +113,60 @@ public class PortfolioService(ILogger<PortfolioService> logger,
             TotalProfitLossPercent = detail.TotalProfitLossPercent ?? 0,
             TotalInstruments = detail.Items.Count
         };
+    }
+
+    public async Task<List<PortfolioValuePointDto>> GetValueHistoryAsync(Guid portfolioId)
+    {
+        var portfolio = await portfolioRepository.GetByIdWithItemsAsync(portfolioId)
+            ?? throw new NotFoundException(nameof(Portfolio), portfolioId.ToString());
+        
+        if (portfolio.UserId != currentUser.userId)
+            throw new NotImplementedException("Forbidden");
+
+        var calendarDays = (DateTime.UtcNow - portfolio.CreatedAt).Days;
+        var tradingDays = Math.Max((int)(calendarDays * 5.0 / 7.0) + 10, 30);
+
+        var pricesByTicker = new Dictionary<string, Dictionary<string, decimal>>();
+
+        foreach (var item in portfolio.Items)
+        {
+            if (pricesByTicker.ContainsKey(item.Ticker)) continue;
+
+            var candles = await marketDataProvider.GetHistoricalPricesAsync(item.Ticker, tradingDays);
+            pricesByTicker[item.Ticker] = candles.ToDictionary(
+                    c => c.Data.ToString("yyyy-MM-dd"),
+                    c => c.Close
+            );
+        }
+
+        var allDates = pricesByTicker.Values
+            .SelectMany(d => d.Keys)
+            .Distinct()
+            .Order()
+            .ToList();
+
+        var result = new List<PortfolioValuePointDto>();
+
+        foreach (var date in allDates)
+        {
+            decimal totalValue = 0;
+            foreach (var item in portfolio.Items)
+            {
+                if (pricesByTicker.TryGetValue(item.Ticker, out var prices)
+                    && prices.TryGetValue(date, out var price))
+                {
+                    totalValue += item.Quantity * price;
+                }
+            }
+
+            result.Add(new PortfolioValuePointDto
+            {
+                Date = date,
+                Value = Math.Round(totalValue, 2)
+            });
+        }
+
+        return result;
+
     }
 }

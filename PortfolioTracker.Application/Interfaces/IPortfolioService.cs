@@ -9,6 +9,7 @@ namespace PortfolioTracker.Application.Interfaces
     public interface IPortfolioService
     {
         Task<IEnumerable<PortfolioSummaryDto>> GetUserPortfoliosAsync();
+        Task<List<PortfolioValuePointDto>> GetValueHistoryAsync(Guid portfolioId);
         Task<PortfolioDetailDto> GetByIdWithItemsAsync(Guid id);
         Task<DashboardDto> GetDashboardAsync(Guid portfolioId);
         Task CreateAsync(CreatePortfolioDto portfolio);

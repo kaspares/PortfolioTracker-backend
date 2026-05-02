@@ -27,7 +27,7 @@ namespace PortfolioTracker.Controllers
         }
 
         [HttpGet("{portfolioId}/dashboard")]
-        public async Task<ActionResult<IEnumerable<PortfolioSummaryDto>>> GetDashboardById(Guid portfolioId)
+        public async Task<ActionResult<PortfolioSummaryDto>> GetDashboardById(Guid portfolioId)
         {
             var result = await portfolioService.GetDashboardAsync(portfolioId);
             return Ok(result);

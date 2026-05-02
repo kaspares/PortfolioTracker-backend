@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PortfolioTracker.Application.DTOs;
 using PortfolioTracker.Application.Interfaces;
 using PortfolioTracker.Application.Services;
@@ -6,6 +7,7 @@ using PortfolioTracker.Application.Services;
 namespace PortfolioTracker.API.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("/api/{portfolioId}/portfolioItems")]
     public class PortfolioItemController(IPortfolioItemService portfolioItemService) : ControllerBase
     {

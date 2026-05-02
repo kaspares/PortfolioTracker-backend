@@ -13,8 +13,7 @@ public static class DependencyInjection
         services.AddScoped<IPortfolioItemService, PortfolioItemService>();
         services.AddAutoMapper(cfg =>
         {
-            cfg.AddMaps(typeof(PortfolioProfile).Assembly);
-            cfg.AddMaps(typeof(PortfolioItemProfile).Assembly);
+            cfg.AddMaps(typeof(DependencyInjection).Assembly);
         });
         return services;
     }
